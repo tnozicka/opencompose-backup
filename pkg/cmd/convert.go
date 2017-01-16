@@ -7,42 +7,37 @@ import (
 
 	"github.com/spf13/cobra"
 	cmdutil "github.com/tnozicka/opencompose/pkg/cmd/util"
+	"github.com/spf13/viper"
 )
 
 var (
-	convertExample = `
-		# Converts file
-		opencompose convert -f opencompose.yaml`
+	convertExample = `  # Converts file
+  opencompose convert -f opencompose.yaml`
 )
 
-func NewCmdConvert(out io.Writer) *cobra.Command {
+func NewCmdConvert(v *viper.Viper, out io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "convert",
 		Short:   "Converts OpenCompose files into Kubernetes (and OpenShift) artifacts",
 		Long:    "Converts OpenCompose files into Kubernetes (and OpenShift) artifacts",
 		Example: convertExample,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return RunConvert(out, cmd)
+			return RunConvert(v, cmd, out)
 		},
 	}
 
-	cmdutil.AddIOFlags(cmd)
+	cmdutil.AddIOFlags(v, cmd)
 
 	return cmd
 }
 
-func RunConvert(out io.Writer, cmd *cobra.Command) error {
-	files, err := cmd.PersistentFlags().GetStringSlice("file")
-	if err != nil {
-		return err
+func RunConvert(v *viper.Viper, cmd *cobra.Command, out io.Writer) error {
+	files := v.GetStringSlice(cmdutil.Flag_File_Key)
+	if len(files) < 1 {
+		return NewUsageError(cmd.Help, "You have to specify at least one input file option")
 	}
 	fmt.Fprintf(out, "files: %#v\n", files)
 
-	loglevel, err := cmd.Flags().GetInt8("loglevel")
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(out, "loglevel: %#v\n", loglevel)
 
 	return errors.New("===test error convert===")
 }

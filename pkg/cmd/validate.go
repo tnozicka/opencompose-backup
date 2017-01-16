@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -13,19 +14,19 @@ var (
 		opencompose validate`
 )
 
-func NewCmdValidate(out io.Writer) *cobra.Command {
+func NewCmdValidate(v *viper.Viper, out io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "validate",
 		Short:   "Print validate information",
 		Long:    "Print validate information",
 		Example: validateExample,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return RunValidate(out, cmd)
+			return RunValidate(v, cmd, out)
 		},
 	}
 	return cmd
 }
 
-func RunValidate(out io.Writer, cmd *cobra.Command) error {
+func RunValidate(v *viper.Viper, cmd *cobra.Command, out io.Writer) error {
 	return errors.New("===test error validate===")
 }
