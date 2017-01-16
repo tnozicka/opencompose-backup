@@ -6,8 +6,8 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
-	cmdutil "github.com/tnozicka/opencompose/pkg/cmd/util"
 	"github.com/spf13/viper"
+	cmdutil "github.com/tnozicka/opencompose/pkg/cmd/util"
 )
 
 var (
@@ -37,7 +37,6 @@ func RunConvert(v *viper.Viper, cmd *cobra.Command, out io.Writer) error {
 		return NewUsageError(cmd.Help, "You have to specify at least one input file option")
 	}
 	fmt.Fprintf(out, "files: %#v\n", files)
-
 
 	return errors.New("===test error convert===")
 }

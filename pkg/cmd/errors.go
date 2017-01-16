@@ -2,13 +2,13 @@ package cmd
 
 type UsageError struct {
 	helpFunc func() error
-	message string
+	message  string
 }
 
 func NewUsageError(helpFunc func() error, message string) UsageError {
 	return UsageError{
 		helpFunc: helpFunc,
-		message: message,
+		message:  message,
 	}
 }
 
