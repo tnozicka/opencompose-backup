@@ -36,6 +36,7 @@ func NewOpenComposeCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	rootCmd.AddCommand(NewCmdConvert(v, out))
 	rootCmd.AddCommand(NewCmdValidate(v, out))
 	rootCmd.AddCommand(NewCmdVersion(v, out))
+	rootCmd.AddCommand(NewCmdCompletion(v, out))
 
 	return rootCmd
 }
