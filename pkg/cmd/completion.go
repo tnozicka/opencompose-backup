@@ -34,8 +34,6 @@ func NewCmdCompletion(v *viper.Viper, out io.Writer) *cobra.Command {
 		ValidArgs: shells,
 	}
 
-	cmdutil.AddIOFlags(v, cmd)
-
 	return cmd
 }
 
