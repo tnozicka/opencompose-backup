@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	cmdutil "github.com/tnozicka/opencompose/pkg/cmd/util"
+	//cmdutil "github.com/tnozicka/opencompose/pkg/cmd/util"
 )
 
 const (
@@ -31,9 +31,9 @@ func NewOpenComposeCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	v.SetEnvPrefix("opencompose")
 	v.AutomaticEnv()
 
-	rootCmd.PersistentFlags().Int8P(Flag_LogLevel_Key, "l", 1, "set loglevel")
-	// We can bind Viper here because this is a global flag for all commands
-	cmdutil.BindViper(v, rootCmd.PersistentFlags(), Flag_LogLevel_Key)
+	//rootCmd.PersistentFlags().Int8P(Flag_LogLevel_Key, "l", 1, "set loglevel")
+	//// We can bind Viper here because this is a global flag for all commands
+	//cmdutil.BindViper(v, rootCmd.PersistentFlags(), Flag_LogLevel_Key)
 
 	rootCmd.AddCommand(NewCmdConvert(v, out))
 	rootCmd.AddCommand(NewCmdValidate(v, out))

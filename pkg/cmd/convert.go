@@ -42,9 +42,6 @@ func RunConvert(v *viper.Viper, cmd *cobra.Command, out io.Writer) error {
 	cmdutil.AddIOFlagsViper(v, cmd)
 	cmdutil.BindViper(v, cmd.PersistentFlags(), Flag_Distro_Key)
 
-	//ll := v.Get(Flag_LogLevel_Key)
-	//fmt.Fprintf(out, "loglevel: %#v\n", ll)
-
 	//od := v.GetString(cmdutil.Flag_OutputDir_Key)
 	dir := v.Get("output-dir")
 	fmt.Fprintf(out, "output-dir: %#v\n", dir)
