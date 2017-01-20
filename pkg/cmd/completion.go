@@ -54,7 +54,6 @@ func RunCompletion(v *viper.Viper, cmd *cobra.Command, args []string, out io.Wri
 	return runFunc(out, cmd.Parent())
 }
 
-
 func runCompletionBash(out io.Writer, rootCmd *cobra.Command) error {
 	return rootCmd.GenBashCompletion(out)
 }

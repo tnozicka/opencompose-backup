@@ -1,14 +1,14 @@
 package util
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"fmt"
+	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
+	"github.com/spf13/viper"
 )
 
 const (
-	Flag_File_Key = "file"
+	Flag_File_Key      = "file"
 	Flag_OutputDir_Key = "output-dir"
 )
 

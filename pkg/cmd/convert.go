@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	Flag_Distro_Key = "distro"
+	Flag_Distro_Key    = "distro"
 	Flag_OutputDir_Key = "output-dir"
 )
 
@@ -29,6 +29,19 @@ func NewCmdConvert(v *viper.Viper, out io.Writer) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return RunConvert(v, cmd, out)
 		},
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if cmd.Parent().PersistentPreRunE != nil {
+				if err := cmd.Parent().PersistentPreRunE(cmd, args); err != nil {
+					return err
+				}
+			}
+
+			// We have to bind Viper in Run because there is only one instance to avoid collisions between subcommands
+			cmdutil.AddIOFlagsViper(v, cmd)
+			cmdutil.BindViper(v, cmd.PersistentFlags(), Flag_Distro_Key)
+
+			return nil
+		},
 	}
 
 	cmdutil.AddIOFlags(cmd)
@@ -38,9 +51,6 @@ func NewCmdConvert(v *viper.Viper, out io.Writer) *cobra.Command {
 }
 
 func RunConvert(v *viper.Viper, cmd *cobra.Command, out io.Writer) error {
-	// We have to bind Viper in Run because there is only one instance to avoid collisions
-	cmdutil.AddIOFlagsViper(v, cmd)
-	cmdutil.BindViper(v, cmd.PersistentFlags(), Flag_Distro_Key)
 
 	//od := v.GetString(cmdutil.Flag_OutputDir_Key)
 	dir := v.Get("output-dir")
@@ -51,7 +61,6 @@ func RunConvert(v *viper.Viper, cmd *cobra.Command, out io.Writer) error {
 
 	//fs := v.Get(cmdutil.Flag_File_Key)
 	//fmt.Fprintf(out, "files: %#v\n", fs)
-
 
 	//files := v.GetStringSlice(cmdutil.Flag_File_Key)
 	//fmt.Fprintf(out, "files: %#v\n", files)

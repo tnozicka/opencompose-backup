@@ -1,24 +1,45 @@
 package object
 
-
-
-type Container struct {
-	Image string `json:"-"`  // this is contained as a key in the parent map
-
+type Port struct {
+	Address       string
+	ContainerPort int
+	HostPort      int
+	ServicePort   int
+	Protocol      string
 }
 
-//type Service struct {
-//	Name string `json:"-"`  // this is contained as a key in the parent map
-//	Containers map[string]*Container
-//}
-type Service map[string]*Container
+type Mapping struct {
+	Port Port
+	Type string
+	Name string
+}
 
-type Volumes struct {
+type EnvVariable struct {
+	Key   string
+	Value string
+}
 
+type Container struct {
+	Name        string
+	Image       string
+	Environment []EnvVariable
+	Mappings    []Mapping
+}
+
+type Service struct {
+	Name       string
+	Containers []Container
+}
+
+type Volume struct {
+	// TODO: remove tags when we have Go 1.8
+	Name string `json:"name"`
+	Size string `json:"size,omitempty"`
+	Mode string `json:"mode,omitempty"`
 }
 
 type OpenCompose struct {
-	Version string `json:"version,omitempty"`
-	Services map[string]*Service `json:"services"`
-	Volumes Volumes `json:"volumes,omitempty"`
+	Version  string
+	Services []Service
+	Volumes  []Volume
 }
