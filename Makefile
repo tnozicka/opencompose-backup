@@ -7,3 +7,6 @@ build:
 
 install:
     go install main.go
+
+test:
+	go test ./...

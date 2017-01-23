@@ -1,9 +1,10 @@
-package encoding
+package v1
 
 import (
 	"fmt"
+	"github.com/ghodss/yaml"
+	"github.com/tnozicka/opencompose/pkg/encoding/util"
 	"github.com/tnozicka/opencompose/pkg/object"
-	"gopkg.in/yaml.v2"
 	"strconv"
 	"strings"
 )
@@ -81,6 +82,13 @@ func (raw *Mapping) Unmarshal() (*object.Mapping, error) {
 		Type: raw.Type,
 	}
 
+	// validate name
+	if err := util.ValidateResourceName(m.Name); err != nil {
+		return nil, fmt.Errorf("service name: %s", err)
+	}
+
+	// TODO: validate type
+
 	// port
 	var err error
 	port, err := raw.Port.Unmarshal()
@@ -127,6 +135,13 @@ func (raw *Container) Unmarshal() (*object.Container, error) {
 		Image: raw.Image,
 	}
 
+	// validate name
+	if err := util.ValidateResourceName(c.Name); err != nil {
+		return nil, fmt.Errorf("service name: %s", err)
+	}
+
+	// TODO: validate image ref
+
 	// environment
 	for _, rawEnv := range raw.Env {
 		envVar, err := rawEnv.Unmarshal()
@@ -159,6 +174,11 @@ func (raw *Service) Unmarshal() (*object.Service, error) {
 		Name: raw.Name,
 	}
 
+	// validate name
+	if err := util.ValidateResourceName(s.Name); err != nil {
+		return nil, fmt.Errorf("service name: %s", err)
+	}
+
 	// containers
 	for _, rawContainer := range raw.Containers {
 		container, err := rawContainer.Unmarshal()
@@ -179,17 +199,30 @@ type Volume struct {
 
 func (raw *Volume) Unmarshal() (*object.Volume, error) {
 	v := object.Volume(*raw)
+
+	// validate name
+	if err := util.ValidateResourceName(v.Name); err != nil {
+		return nil, fmt.Errorf("volume name: %s", err)
+	}
+
+	// TODO: validate size
+
+	// TODO: validate mode
+
 	return &v, nil
 }
 
 type OpenCompose struct {
-	Version  string    `json:"version,omitempty"`
+	Version  int       `json:"version,omitempty"`
 	Services []Service `json:"services"`
 	Volumes  []Volume  `json:"volumes,omitempty"`
 }
 
 func (raw *OpenCompose) Unmarshal() (*object.OpenCompose, error) {
 	// version
+	if raw.Version != 1 {
+		return nil, fmt.Errorf("unmarshal OpenCompose (version 1): unsupported version %d", raw.Version)
+	}
 	o := &object.OpenCompose{
 		Version: raw.Version,
 	}
@@ -215,6 +248,8 @@ func (raw *OpenCompose) Unmarshal() (*object.OpenCompose, error) {
 	return o, nil
 }
 
+type Decoder struct{}
+
 // Unmarshals OpenCompose file into object.OpenCompose struct
 // It does not add any additional (or default) values so it can be marshaled back
 // to give the same result
@@ -222,7 +257,7 @@ func (raw *OpenCompose) Unmarshal() (*object.OpenCompose, error) {
 // and there is already accepted proposal for Go 1.9 about json alternative
 // https://github.com/golang/go/issues/15314 so hopefully yaml gets something similar
 // otherwise we have to ditch the decoder and write our own using reflect
-func Unmarshal(data []byte) (*object.OpenCompose, error) {
+func (u *Decoder) Unmarshal(data []byte) (*object.OpenCompose, error) {
 	rawOpenCompose := &OpenCompose{}
 	// TODO: check for excess fields (see above)
 	err := yaml.Unmarshal(data, rawOpenCompose)

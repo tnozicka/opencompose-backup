@@ -10,6 +10,7 @@ import (
 const (
 	Flag_File_Key      = "file"
 	Flag_OutputDir_Key = "output-dir"
+	Flag_Distro_Key    = "distro"
 )
 
 func UsageError(cmd *cobra.Command, format string, args ...interface{}) error {
@@ -18,7 +19,7 @@ func UsageError(cmd *cobra.Command, format string, args ...interface{}) error {
 }
 
 func BindViperNames(v *viper.Viper, fs *flag.FlagSet, viperName string, cobraName string) {
-	// errors here are mistakea in the code and cobra will panic in similar conditions; let's not handle it differently here right now
+	// errors here are mistakes in the code and cobra will panic in similar conditions; let's not handle it differently here right now
 
 	flag := fs.Lookup(cobraName)
 	if flag == nil {
@@ -36,11 +37,13 @@ func BindViper(v *viper.Viper, fs *flag.FlagSet, name string) {
 }
 
 func AddIOFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringP(Flag_OutputDir_Key, "o", "./", "Specify output directory for genrated Kubernetes (and OpenShift) definitions")
 	cmd.PersistentFlags().StringSliceP(Flag_File_Key, "f", []string{}, "Specify alternative OpenCompose file(s)")
+	cmd.PersistentFlags().StringP(Flag_OutputDir_Key, "o", "./", "Specify output directory for genrated Kubernetes (and OpenShift) definitions")
+	cmd.PersistentFlags().StringP(Flag_Distro_Key, "d", "kubernetes", "Choose a target distribution")
 }
 
 func AddIOFlagsViper(v *viper.Viper, cmd *cobra.Command) {
-	BindViper(v, cmd.PersistentFlags(), Flag_OutputDir_Key)
 	BindViper(v, cmd.PersistentFlags(), Flag_File_Key)
+	BindViper(v, cmd.PersistentFlags(), Flag_OutputDir_Key)
+	BindViper(v, cmd.PersistentFlags(), Flag_Distro_Key)
 }

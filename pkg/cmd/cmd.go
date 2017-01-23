@@ -1,12 +1,13 @@
 package cmd
 
 import (
-	"io"
-
 	"errors"
+	"io"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	cmdutil "github.com/tnozicka/opencompose/pkg/cmd/util"
+	//cmdutil "github.com/tnozicka/opencompose/pkg/cmd/util"
 )
 
 const (
@@ -17,6 +18,8 @@ func NewOpenComposeCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	v := viper.New()
 	v.SetEnvPrefix("opencompose")
 	v.AutomaticEnv()
+	replacer := strings.NewReplacer("-", "_")
+	v.SetEnvKeyReplacer(replacer)
 
 	// Parent command to which all subcommands are added.
 	rootCmd := &cobra.Command{
@@ -31,7 +34,6 @@ func NewOpenComposeCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// We have to bind Viper in Run because there is only one instance to avoid collisions between subcommands
-			cmdutil.BindViper(v, cmd.PersistentFlags(), Flag_Verbose_Key)
 
 			return nil
 		},

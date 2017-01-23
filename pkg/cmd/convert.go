@@ -1,18 +1,23 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"strings"
 
+	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	cmdutil "github.com/tnozicka/opencompose/pkg/cmd/util"
-)
+	"github.com/tnozicka/opencompose/pkg/encoding"
+	"github.com/tnozicka/opencompose/pkg/object"
+	"github.com/tnozicka/opencompose/pkg/transform"
+	"github.com/tnozicka/opencompose/pkg/transform/kubernetes"
+	"github.com/tnozicka/opencompose/pkg/transform/openshift"
 
-const (
-	Flag_Distro_Key    = "distro"
-	Flag_OutputDir_Key = "output-dir"
+	//"k8s.io/client-go/pkg/api"
+	//"k8s.io/client-go/pkg/runtime/schema"
 )
 
 var (
@@ -38,35 +43,97 @@ func NewCmdConvert(v *viper.Viper, out io.Writer) *cobra.Command {
 
 			// We have to bind Viper in Run because there is only one instance to avoid collisions between subcommands
 			cmdutil.AddIOFlagsViper(v, cmd)
-			cmdutil.BindViper(v, cmd.PersistentFlags(), Flag_Distro_Key)
 
 			return nil
 		},
 	}
 
 	cmdutil.AddIOFlags(cmd)
-	cmd.PersistentFlags().StringP(Flag_Distro_Key, "d", "kubernetes", "Choose a target distribution")
 
 	return cmd
 }
 
+func GetValidatedObject(v *viper.Viper, cmd *cobra.Command, out io.Writer) (*object.OpenCompose, error) {
+	files := v.GetStringSlice(cmdutil.Flag_File_Key)
+	if len(files) < 1 {
+		return nil, cmdutil.UsageError(cmd, "there has to be at least one file")
+	}
+
+	var ocObjects []*object.OpenCompose
+	for _, file := range files {
+		data, err := ioutil.ReadFile(file)
+		if err != nil {
+			return nil, fmt.Errorf("unable to read file '%s': %s", file, err)
+		}
+
+		decoder, err := encoding.GetDecoderFor(data)
+		if err != nil {
+			return nil, fmt.Errorf("could not find decoder for file '%s': %s", file, err)
+		}
+
+		o, err := decoder.Unmarshal(data)
+		if err != nil {
+			return nil, fmt.Errorf("could not unmarsha data for file '%s': %s", file, err)
+		}
+
+		ocObjects = append(ocObjects, o)
+	}
+
+	// FIXME: implement merging OpenCompose obejcts
+	openCompose := ocObjects[0]
+
+	openCompose.Validate()
+
+	return openCompose, nil
+}
+
 func RunConvert(v *viper.Viper, cmd *cobra.Command, out io.Writer) error {
+	o, err := GetValidatedObject(v, cmd, out)
+	if err != nil {
+		return err
+	}
 
-	//od := v.GetString(cmdutil.Flag_OutputDir_Key)
-	dir := v.Get("output-dir")
-	fmt.Fprintf(out, "output-dir: %#v\n", dir)
+	var transformer transform.Transformer
+	distro := v.GetString("distro")
+	switch d := strings.ToLower(distro); d {
+	case "kubernetes":
+		transformer = &kubernetes.Transformer{}
+	case "openshift":
+		transformer = &openshift.Transformer{}
+	default:
+		return fmt.Errorf("unknown distro '%s'", distro)
+	}
 
-	d := v.Get("distro")
-	fmt.Fprintf(out, "distro: %#v\n", d)
+	runtimeObjects, err := transformer.Transform(o)
+	if err != nil {
+		return fmt.Errorf("transformation failed: %s", err)
+	}
 
-	//fs := v.Get(cmdutil.Flag_File_Key)
-	//fmt.Fprintf(out, "files: %#v\n", fs)
+	outputDir := v.GetString(cmdutil.Flag_OutputDir_Key)
+	if outputDir == "-" {
+		// don't use dir but write it to out (stdout)
+		fmt.Fprintf(out, "runtimeObjects: %#v\n", runtimeObjects)
+		for i, runtimeObject := range runtimeObjects {
+			if i > 0 {
+				fmt.Fprintln(out, "---")
+			}
 
-	//files := v.GetStringSlice(cmdutil.Flag_File_Key)
-	//fmt.Fprintf(out, "files: %#v\n", files)
-	//if len(files) < 1 {
-	//	return NewUsageError(cmd.Help, "You have to specify at least one input file option")
-	//}
+			// FIXME: (bellow)
+			versionedObject := runtimeObject
+			//versionedObject, err := api.Scheme.ConvertToVersion(runtimeObject, schema.GroupVersion{})
+			//if err != nil {
+			//	return fmt.Errorf("ConvertToVersion failed: %s", err)
+			//}
 
-	return errors.New("===test error convert===")
+			data, err := yaml.Marshal(versionedObject)
+			if err != nil {
+				return fmt.Errorf("failed to marshal object: %s", err)
+			}
+			fmt.Fprintln(out, string(data))
+		}
+	} else {
+		// write files
+	}
+
+	return nil
 }

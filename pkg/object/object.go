@@ -39,7 +39,14 @@ type Volume struct {
 }
 
 type OpenCompose struct {
-	Version  string
+	Version  int
 	Services []Service
 	Volumes  []Volume
+}
+
+// Does high level (mostly semantic) validation of OpenCompose
+// (e.g. it checks internal object references)
+func (o *OpenCompose) Validate() error {
+	// TODO: implement
+	return nil
 }

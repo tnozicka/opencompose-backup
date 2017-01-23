@@ -1,4 +1,4 @@
-package encoding
+package v1
 
 import (
 	"github.com/tnozicka/opencompose/pkg/object"
@@ -132,7 +132,7 @@ volumes:
   mode: ReadWriteOnce
 `,
 			&object.OpenCompose{
-				Version: "1",
+				Version: 1,
 				Services: []object.Service{
 					{
 						Name: "frontend",
@@ -187,7 +187,8 @@ volumes:
 	}
 
 	for _, tt := range tests {
-		openCompose, err := Unmarshal([]byte(tt.File))
+		data := []byte(tt.File)
+		openCompose, err := (&Decoder{}).Unmarshal(data)
 		if err != nil {
 			if tt.Succeed {
 				t.Errorf("Failed to unmarshal %#v; error %#v", tt.File, err)
