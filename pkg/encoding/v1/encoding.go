@@ -224,6 +224,7 @@ func (raw *OpenCompose) Unmarshal() (*object.OpenCompose, error) {
 // otherwise we have to ditch the decoder and write our own using reflect
 func Unmarshal(data []byte) (*object.OpenCompose, error) {
 	rawOpenCompose := &OpenCompose{}
+	// TODO: check for excess fields (see above)
 	err := yaml.Unmarshal(data, rawOpenCompose)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal OpenCompose: %s", err)
@@ -235,8 +236,6 @@ func Unmarshal(data []byte) (*object.OpenCompose, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO: validate restrictions (enums, isAlpha, ...) for yaml types that did not have specialized parser
 
 	return openCompose, nil
 }
