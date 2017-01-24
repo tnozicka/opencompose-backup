@@ -14,14 +14,14 @@ var (
 		opencompose validate`
 )
 
-func NewCmdValidate(v *viper.Viper, out io.Writer) *cobra.Command {
+func NewCmdValidate(v *viper.Viper, out, outerr io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "validate",
 		Short:   "Print validate information",
 		Long:    "Print validate information",
 		Example: validateExample,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return RunValidate(v, cmd, out)
+			return RunValidate(v, cmd, out, outerr)
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if cmd.Parent().PersistentPreRunE != nil {
@@ -42,7 +42,7 @@ func NewCmdValidate(v *viper.Viper, out io.Writer) *cobra.Command {
 	return cmd
 }
 
-func RunValidate(v *viper.Viper, cmd *cobra.Command, out io.Writer) error {
-	_, err := GetValidatedObject(v, cmd, out)
+func RunValidate(v *viper.Viper, cmd *cobra.Command, out, outerr io.Writer) error {
+	_, err := GetValidatedObject(v, cmd, out, outerr)
 	return err
 }

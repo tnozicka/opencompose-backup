@@ -2,11 +2,12 @@ package v1
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/ghodss/yaml"
 	"github.com/tnozicka/opencompose/pkg/encoding/util"
 	"github.com/tnozicka/opencompose/pkg/object"
-	"strconv"
-	"strings"
 )
 
 type Port string

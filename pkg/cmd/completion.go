@@ -17,7 +17,7 @@ var (
 	}
 )
 
-func NewCmdCompletion(v *viper.Viper, out io.Writer) *cobra.Command {
+func NewCmdCompletion(v *viper.Viper, out, outerr io.Writer) *cobra.Command {
 	shells := []string{}
 	for s := range completionShells {
 		shells = append(shells, s)
@@ -29,7 +29,7 @@ func NewCmdCompletion(v *viper.Viper, out io.Writer) *cobra.Command {
 		Long:    "Generate the opencompose completion code for bash",
 		Example: completionExample,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return RunCompletion(v, cmd, args, out)
+			return RunCompletion(v, cmd, args, out, outerr)
 		},
 		ValidArgs: shells,
 	}
@@ -37,7 +37,7 @@ func NewCmdCompletion(v *viper.Viper, out io.Writer) *cobra.Command {
 	return cmd
 }
 
-func RunCompletion(v *viper.Viper, cmd *cobra.Command, args []string, out io.Writer) error {
+func RunCompletion(v *viper.Viper, cmd *cobra.Command, args []string, out, outerr io.Writer) error {
 	if len(args) == 0 {
 		return cmdutil.UsageError(cmd, "Shell not specified.")
 	}

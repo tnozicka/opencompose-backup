@@ -15,20 +15,20 @@ var (
 		kubectl version`
 )
 
-func NewCmdVersion(v *viper.Viper, out io.Writer) *cobra.Command {
+func NewCmdVersion(v *viper.Viper, out, outerr io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "version",
 		Short:   "Print version information",
 		Long:    "Print version information",
 		Example: versionExample,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return RunVersion(v, cmd, out)
+			return RunVersion(v, cmd, out, outerr)
 		},
 	}
 	return cmd
 }
 
-func RunVersion(v *viper.Viper, cmd *cobra.Command, out io.Writer) error {
+func RunVersion(v *viper.Viper, cmd *cobra.Command, out, outerr io.Writer) error {
 	info := version.Get()
 	fmt.Fprintln(out, info)
 	return nil

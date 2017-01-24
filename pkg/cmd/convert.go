@@ -15,7 +15,6 @@ import (
 	"github.com/tnozicka/opencompose/pkg/transform"
 	"github.com/tnozicka/opencompose/pkg/transform/kubernetes"
 	"github.com/tnozicka/opencompose/pkg/transform/openshift"
-
 	//"k8s.io/client-go/pkg/api"
 	//"k8s.io/client-go/pkg/runtime/schema"
 )
@@ -25,14 +24,14 @@ var (
   opencompose convert -f opencompose.yaml`
 )
 
-func NewCmdConvert(v *viper.Viper, out io.Writer) *cobra.Command {
+func NewCmdConvert(v *viper.Viper, out, outerr io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "convert",
 		Short:   "Converts OpenCompose files into Kubernetes (and OpenShift) artifacts",
 		Long:    "Converts OpenCompose files into Kubernetes (and OpenShift) artifacts",
 		Example: convertExample,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return RunConvert(v, cmd, out)
+			return RunConvert(v, cmd, out, outerr)
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if cmd.Parent().PersistentPreRunE != nil {
@@ -53,7 +52,7 @@ func NewCmdConvert(v *viper.Viper, out io.Writer) *cobra.Command {
 	return cmd
 }
 
-func GetValidatedObject(v *viper.Viper, cmd *cobra.Command, out io.Writer) (*object.OpenCompose, error) {
+func GetValidatedObject(v *viper.Viper, cmd *cobra.Command, out, outerr io.Writer) (*object.OpenCompose, error) {
 	files := v.GetStringSlice(cmdutil.Flag_File_Key)
 	if len(files) < 1 {
 		return nil, cmdutil.UsageError(cmd, "there has to be at least one file")
@@ -87,8 +86,8 @@ func GetValidatedObject(v *viper.Viper, cmd *cobra.Command, out io.Writer) (*obj
 	return openCompose, nil
 }
 
-func RunConvert(v *viper.Viper, cmd *cobra.Command, out io.Writer) error {
-	o, err := GetValidatedObject(v, cmd, out)
+func RunConvert(v *viper.Viper, cmd *cobra.Command, out, outerr io.Writer) error {
+	o, err := GetValidatedObject(v, cmd, out, outerr)
 	if err != nil {
 		return err
 	}

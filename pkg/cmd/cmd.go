@@ -7,14 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	//cmdutil "github.com/tnozicka/opencompose/pkg/cmd/util"
 )
 
-const (
-	Flag_Verbose_Key = "loglevel"
-)
-
-func NewOpenComposeCommand(in io.Reader, out, err io.Writer) *cobra.Command {
+func NewOpenComposeCommand(in io.Reader, out, outerr io.Writer) *cobra.Command {
 	v := viper.New()
 	v.SetEnvPrefix("opencompose")
 	v.AutomaticEnv()
@@ -41,10 +36,10 @@ func NewOpenComposeCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 		SilenceUsage:  true,
 	}
 
-	rootCmd.AddCommand(NewCmdConvert(v, out))
-	rootCmd.AddCommand(NewCmdValidate(v, out))
-	rootCmd.AddCommand(NewCmdVersion(v, out))
-	rootCmd.AddCommand(NewCmdCompletion(v, out))
+	rootCmd.AddCommand(NewCmdConvert(v, out, outerr))
+	rootCmd.AddCommand(NewCmdValidate(v, out, outerr))
+	rootCmd.AddCommand(NewCmdVersion(v, out, outerr))
+	rootCmd.AddCommand(NewCmdCompletion(v, out, outerr))
 
 	return rootCmd
 }
